@@ -1,0 +1,39 @@
+name: Build
+on: push
+permissions: write-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Install jq
+        run: sudo apt-get install -y jq p7zip-full wget
+      - id: getname
+        run: |
+          echo "NAME=$(cat info.json | jq '.id' | tr -d '"')" >> "$GITHUB_ENV"
+          echo "ICON=$(cat info.json | jq '.icon' | tr -d '"')" >> "$GITHUB_ENV"
+      - name: Download PaddleOCR-json
+        run: |
+          wget https://github.com/hiroi-sora/PaddleOCR-json/releases/download/v1.4.1/PaddleOCR-json_v1.4.1_dev.1_windows_x86-64_cpu_mkl.7z
+      - name: extract-7z-action
+        run: 7za x PaddleOCR-json_v1.4.1_dev.1_windows_x86-64_cpu_mkl.7z
+      - uses: vimtor/action-zip@v1
+        with:
+          files: info.json ${{ env.ICON  }} main.js PaddleOCR-json_v1.4.1_dev.1_windows_x86-64_cpu_mkl.7z
+          dest: ${{ env.NAME }}.potext
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NAME }}
+          path: "${{ env.NAME }}.potext"
+          if-no-files-found: error
+      - name: Upload Release
+        if: startsWith(github.ref, 'refs/tags')
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: "${{ env.NAME }}.potext"
