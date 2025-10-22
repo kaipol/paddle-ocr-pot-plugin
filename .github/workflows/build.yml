@@ -23,7 +23,7 @@ jobs:
         run: 7za x PaddleOCR-json_v1.4.1_dev.1_windows_x86-64_cpu_mkl.7z
       - uses: vimtor/action-zip@v1
         with:
-          files: info.json ${{ env.ICON  }} main.js PaddleOCR-json_v1.4.1_dev.1_windows_x86-64_cpu_mkl.7z
+          files: info.json ${{ env.ICON  }} main.js PaddleOCR-json_v1.4.1_dev.1_windows_x86-64_cpu_mkl
           dest: ${{ env.NAME }}.potext
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
